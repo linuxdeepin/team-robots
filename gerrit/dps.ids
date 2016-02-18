@@ -1,0 +1,49 @@
+1 dde-api
+3 dde-control-center
+6 default-gsettings deepin-default-gsettings
+7 dde-workspace deepin-desktop-environment
+8 deepin-game deepin-game-center
+9 deepin-gtk-theme
+10 deepin-icon-theme
+11 deepin-media-player
+13 deepin-music deepin-music-player
+14 deepin-notifications
+15 deepin-qml-widgets
+16 deepin-screenshot
+17 deepin-store deepin-software-center
+18 deepin-software-center-data
+19 deepin-terminal
+21 deepin-user-manual
+26 deepin-utils
+28 startdde
+29 dde-daemon
+31 dbus-factory
+37 go-lib go-dlib
+38 deepin-emacs
+39 deepin-emacs-common
+40 deepin-movie
+41 deepin-ui
+42 deepin-menu
+43 deepin-translator
+44 deepin-installer
+46 python-deepin-storm
+47 deepin-artwork-themes
+48 go-dbus-generator dbus-generator
+50 deepin-download-service
+51 qml-dde-dock-applet
+52 deepin-bug-reporter
+53 deepin-gettext-tools
+54 deepin-boot-maker
+55 deepin-wm
+56 deepin-mutter
+57 deepin-webkit
+58 dde-dock-applets
+59 qtav
+60 deepin-os-upgrader
+61 plymouth-theme-deepin
+62 deepin-screenshot-v3
+63 deepin-social-sharing
+65 dae
+66 deepin-feedback
+67 deepin-manual
+69 deepin-remote-assistance

@@ -1,0 +1,23 @@
+.bugz_submit{
+    margin-left: 5px;
+}
+
+.bugz_jump{
+    font-size: 12px;
+    color: #fff;
+    background-color: #5bc0de;
+    border-color: #46b8da;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+    border-radius:8px;
+}
+
+.bugz_jump:hover{
+    color: #fff;
+    background-color: #31b0d5;
+    border-color: #269abc;
+}
+
+.bugz_waiting{
+    font-size: 15px;
+}

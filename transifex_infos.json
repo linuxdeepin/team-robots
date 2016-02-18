@@ -1,0 +1,96 @@
+{
+    "User": "deepin_transifex",
+    "Password": "",
+    "Projects": [
+    {
+	"transifex":"dde-control-center",
+	"git": "dde-control-center",
+	"resources": ["dde-control-center-2014-06-27", "desktop"],
+	"po": ["locale"]
+    },
+    {
+	"transifex":"dde-daemon",
+	"git": "dde-daemon",
+	"resources": ["dde-daemon-20140620"],
+	"po": ["misc/po"]
+    },
+    {
+	"transifex": "deepin-boot-maker",
+	"git": "deepin-boot-maker",
+	"resources": ["deepin-boot-makerpot"],
+	"po": ["src/po"]
+    },
+    {
+	"transifex": "deepin-desktop-environment",
+	"git" : "dde-workspace",
+	"resources": ["Deepin-Desktop-Enviroment--20140619"],
+	"po": ["po"]
+    },
+    {
+	"transifex": "deepin-game",
+	"git" : "deepin-game",
+	"resources": ["deepin-game-20140619", "desktop"],
+	"po": ["locale"]
+    },
+    {
+	"transifex": "deepin-installer",
+	"git": "deepin-installer",
+	"resources": ["master", "desktop"],
+	"po": ["po"]
+    },
+    {
+	"transifex": "deepin-movie",
+	"git": "deepin-movie",
+	"resources": ["deepin-movie-20140619", "desktop"],
+	"po": ["locale"]
+    },
+    {
+	"transifex": "deepin-music",
+	"git": "deepin-music",
+	"resources": ["deepin-music-20140619", "desktop"],
+	"po": ["locale"]
+    },
+    {
+	"transifex": "deepin-screenshot",
+	"git": "deepin-screenshot",
+	"resources": ["deepin-screenshot-20140619", "desktop"],
+	"po": ["locale"]
+    },
+    {
+	"transifex": "deepin-store",
+	"git": "deepin-store",
+	"resources": ["deepin-store", "desktop"],
+	"po": ["locale"]
+    },
+    {
+	"transifex": "deepin-terminal",
+	"git": "deepin-terminal",
+	"resources": ["deepin-terminal-20140625", "desktop"],
+	"po": ["locale"]
+    },
+    {
+	"transifex": "deepin-translator",
+	"git": "deepin-translator",
+	"resources": ["deepin-translator-20140619", "desktop"],
+	"po": ["locale"]
+    },
+    {
+	"transifex": "deepin-ui",
+	"git": "deepin-ui",
+	"resources": ["deepin-uipot-1"],
+	"po": ["dtk/locale"]
+    },
+    {
+	"transifex": "startdde-dialog",
+	"git": "startdde",
+	"resources": ["startddepot"],
+	"po": ["dialogUI/po"]
+    },
+    {
+	"transifex": "deepin-qml-widgets",
+	"git": "deepin-qml-widgets",
+	"resources": ["deepin-qml-widgets"],
+	"po": ["locale"]
+    }
+    ]
+}

@@ -1,0 +1,101 @@
+#!/bin/bash
+#TODO:
+#1. support specify patch set
+#2. support getopt
+
+declare tryRun
+
+usage() { echo "Usage: $0 [-d ] [-l] CL_ID" 1>&2; exit 1; }
+while getopts ":l" o; do
+    case "${o}" in
+	d)
+	    echo "Didn't support speicfy patch set currently"
+	    ;;
+	l)
+	    tryRun=true
+	    ;;
+	*)
+	    usage
+	    ;;
+    esac
+done
+shift $((OPTIND-1))
+if [ ! -n "$1" ]; then
+    echo "Please give the CL id"
+    exit 1
+fi
+
+#-----------------------------------------------------------------
+
+get_deb()
+{
+    url=$1
+    files=($(curl -s $url | grep -o '<a href=['"'"'"][^"'"'"']*.deb['"'"'"]' | sed -e 's/^<a href=["'"'"']//' -e 's/["'"'"']$//'))
+
+    for ((i=0; i<${#files[@]}; i++)); do
+	if [ $i -ne 0 ]; then
+	    echo ","
+	fi
+	echo \"$url${files[$i]}\"
+    done
+}
+
+get_one_patchset()
+{
+    key=$(echo $1 | sed -nE 's/Patch Set (.+): V.+/\1/p')
+    value=$(echo $1 | sed -nE 's/.*http:(.+) :.*/http:\1/p')
+    deb=$(get_deb "$value")
+    echo -n {\"patchset\":$key, \"urls\":[$deb]}
+}
+
+get_pathsets()
+{
+    CL=$1
+    #raw_output=$(ssh -p 29418 codereview.linuxdeepin.com gerrit query $CL --comments --format=JSON)
+    #raw_output=$(echo $raw_output | jq 'select(.comments) | .comments[] | select(.reviewer.username == "jenkins") | .message | select(contains("SUCCESS")) ')
+    raw_output=$(curl -s http://121.40.93.113:8080/changes/$CL/detail | sed 1d | jq '.messages')
+    raw_output=$(echo $raw_output | jq '.[] | select(.author.username=="jenkins") | .message | select(contains("SUCCESS") or contains("FAILURE"))')
+    eval raw_output=($raw_output)
+
+    echo "["
+    len=$(expr ${#raw_output[@]} - 1)
+    for ((i=$len; i>=0; i--)); do
+	if [ $i -ne $len ]
+	then
+	    echo ","
+	fi
+	get_one_patchset "${raw_output[$i]}"
+    done
+    echo -e "\n]"
+}
+
+install_CL()
+{
+    json=$(get_pathsets $1)
+    debs=$(echo $json | jq '.[0].urls[]')
+    eval debs=($debs)
+    for deb in ${debs[@]}; do
+	echo "Downloading ..$deb"
+	wget $deb -O .tmp.deb
+	echo "Installing ..$deb"
+	sudo dpkg -i .tmp.deb
+	rm .tmp.deb
+    done
+}
+
+check_status()
+{
+    status=$(curl -s http://121.40.93.113:8080/changes/$1/detail | sed 1d |  jq '.status')
+    if [ ${status//\"/} != "NEW" ] ;then
+	echo http://121.40.93.113:8080/#/c/$1 was merged or abandoned
+	exit 1
+    fi
+}
+
+check_status $1
+
+if [ $tryRun ]; then
+    get_pathsets $1
+else
+    install_CL $1
+fi

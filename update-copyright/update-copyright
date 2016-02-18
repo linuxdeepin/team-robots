@@ -1,0 +1,287 @@
+#!/bin/bash
+
+# Copyright (C) 2016 Deepin Technology Co., Ltd.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+
+###** Basic Configuration
+LC_ALL=C
+
+app_file="${0}"
+app_name="$(basename ${0})"
+
+###** Functions
+show_usage() {
+  cat <<EOF
+${app_name} [-a] [-u] [-y <year>] [-h] [files...]
+Options:
+    -a, --add, add copyright for the source files that missing one
+    -u, --update, update the copyright even the source files owns one
+    -y, --year, use the custom year e.g. 2015
+    -v, --verbos, show verbose output e.g. the ignored files
+    -h, --help, show this message
+
+    If there is no other arguments, ${app_name} will list the files that missing
+    copyright information and exit with error code 1.
+EOF
+}
+
+is_git_repo() {
+    if [ -d .git ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+is_own_copyright() {
+    if head -30 "${1}" | grep -zq Copyright; then
+        return
+    else
+        return 1
+    fi
+}
+
+OPT_ADD=1
+OPT_UPDATE=2
+get_next_operation() {
+    local target="${1}"
+    if is_own_copyright "${target}"; then
+        if [ "${arg_update}" ]; then
+            echo "Update copyright:" "${target}"
+            return ${OPT_UPDATE}
+        fi
+    else
+        if [ "${arg_add}" ]; then
+            echo "Add copyright:" "${target}"
+            return ${OPT_ADD}
+        else
+            echo "Missing copyright:" "${target}"
+            missing_copyright=1
+            return
+        fi
+    fi
+}
+
+check_copyright() {
+    local target="${1}"
+    case "${target}" in
+        *.h|*.c|*.cc|*.cxx|*.cpp) check_copyright_c "${target}";;
+        *.py|*.sh|*.pl) check_copyright_scripts "${target}";;
+        *.go) check_copyright_go "${target}";;
+        *) if [ "${arg_verbose}" ]; then echo "Verbose: ignore" "${target}"; fi;;
+    esac
+}
+
+
+check_copyright_c() {
+    local target="${1}"
+    get_next_operation "${target}"
+    local opt_num=$?
+    if [ ${opt_num} -eq ${OPT_ADD} ]; then
+        do_add_copyright_c "${target}"
+    elif [ ${opt_num} -eq ${OPT_UPDATE} ]; then
+        do_update_copyright_c "${target}"
+    fi
+}
+do_add_copyright_c() {
+    printf "${copyright_c}\n\n" | cat - "${1}" > "${1}".new
+    mv -f "${1}".new "${1}"
+}
+do_update_copyright_c() {
+    local target="${1}"
+    printf "${copyright_c}\n\n" > /tmp/copyright
+    local range=(`awk -e '
+    /\/\*/ { start = NR; has_copyright = 0; }
+    /[cC]opyright/ { has_copyright = 1; }
+    /\*\// {
+        if (has_copyright) {
+            end = NR;
+            exit;
+        }
+        start = 0;
+        has_copyright = 0;
+    }
+
+    END { print start, end }' "${target}"`)
+    if [ "${arg_verbose}" ]; then
+        echo "Verbose: range:" ${range[@]}
+    fi
+    sed -i -e "${range[0]},${range[1]}d" -e "${range[0]},${range[0]}r /tmp/copyright" "${target}"
+    sed -i -e "${range[0]}d" "${target}" # remove the spare empty line at begin
+    if [[ $? != 0 ]]; then
+        echo "Error: failed for ${target}"
+    fi
+}
+
+check_copyright_go() {
+    local target="${1}"
+    get_next_operation "${target}"
+    local opt_num=$?
+    if [ ${opt_num} -eq ${OPT_ADD} ]; then
+        do_add_copyright_go "${target}"
+    elif [ ${opt_num} -eq ${OPT_UPDATE} ]; then
+        do_update_copyright_c "${target}"
+    fi
+}
+do_add_copyright_go() {
+    local target="${1}"
+    if head -1 "${target}" | grep -q '+build'; then
+        # avoid break '//+build' in first line
+        printf "\n${copyright_c}\n" > /tmp/copyright
+        sed -i -e "1r /tmp/copyright" "${target}"
+    else
+        printf "${copyright_c}\n\n" | cat - "${1}" > "${1}".new
+        mv -f "${1}".new "${1}"
+    fi
+}
+
+check_copyright_scripts() {
+    local target="${1}"
+    get_next_operation "${target}"
+    local opt_num=$?
+    if [ ${opt_num} -eq ${OPT_ADD} ]; then
+        do_add_copyright_script "${target}"
+    elif [ ${opt_num} -eq ${OPT_UPDATE} ]; then
+        do_update_copyright_script "${target}"
+    fi
+}
+do_add_copyright_script() {
+    local target="${1}"
+    if head -1 "${target}" | grep -q '#!'; then
+        # avoid break '#!' in first line
+        printf "\n${copyright_script}\n" > /tmp/copyright
+        sed -i -e "1r /tmp/copyright" "${target}"
+    else
+        printf "${copyright_script}\n\n" | cat - "${1}" > "${1}".new
+        mv -f "${1}".new "${1}"
+    fi
+}
+do_update_copyright_script() {
+    local target="${1}"
+    printf "${copyright_script}\n\n" > /tmp/copyright
+    local range=(`awk -e '
+    BEGIN { start = -1; end = -1; last_comment=0; has_copyright = 0; }
+    /^#/ {
+        if (last_comment+1 != NR) {
+            start = NR;
+            has_copyright = 0;
+        }
+        last_comment = NR
+    }
+    /[cC]opyright/ {
+        if (start != -1) {
+            has_copyright = 1;
+        }
+    }
+    /^$/ {
+        if (has_copyright) {
+            end = NR-1;
+            exit;
+        }
+    }
+
+    END {
+        if (end == -1) {
+            end = NR;
+        }
+        print start, end
+     } ' "${target}"`)
+    if [ "${arg_verbose}" ]; then
+        echo "Verbose: range:" ${range[@]}
+    fi
+    sed -i -e "${range[0]},${range[1]}d" -e "${range[0]},${range[0]}r /tmp/copyright" "${target}"
+    sed -i -e "${range[0]}d" "${target}" # remove the spare empty line at begin
+    if [[ $? != 0 ]]; then
+        echo "Error: failed for ${target}"
+    fi
+}
+
+###** Main
+arg_add=
+arg_update=
+arg_year=$(date +"%Y") # default is current year
+arg_help=
+arg_verbose=
+arg_files=()
+
+missing_copyright=
+copyright_tpl_c="/**
+ * Copyright (C) %s Deepin Technology Co., Ltd.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ **/"
+
+copyright_tpl_script="# Copyright (C) %s Deepin Technology Co., Ltd.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version."
+
+# will initialize later
+copyright_c=
+copyright_script=
+
+# dispatch arguments
+while [ $# -gt 0 ]; do
+    case ${1} in
+        -a|--add)     arg_add=1; shift;;
+        -u|--update)  arg_update=1; shift;;
+        -y|--year)    arg_year="${2}"; shift; shift;;
+        -v|--verbose) arg_verbose=1; shift;;
+        -h|--help)    arg_help=1; break;;
+        *) arg_files+=("${1}"); shift;;
+    esac
+done
+
+if [ "${arg_help}" ]; then
+    show_usage
+    exit
+fi
+
+# build copyright format
+copyright_c="$(printf "${copyright_tpl_c}" ${arg_year})"
+copyright_script="$(printf "${copyright_tpl_script}" ${arg_year})"
+
+# get target files
+IFS_old=${IFS}
+IFS=$'\n'
+if [ ${#arg_files[@]} -eq 0 ]; then
+    if is_git_repo; then
+        for f in $(git ls-files); do
+            arg_files+=("${f}")
+        done
+    else
+        for f in $(find . -type f); do
+            arg_files+=("${f}")
+        done
+    fi
+fi
+IFS=${IFS_old} # restore IFS or sed command could not works
+
+# do it!
+for f in "${arg_files[@]}"; do
+    if [ -f "${f}" ]; then
+        check_copyright "${f}"
+    else
+        echo "Error: file not exists" "${f}"
+    fi
+done
+
+if [ "${missing_copyright}" ]; then
+    exit 1
+fi
+
+# Local Variables:
+# mode: sh
+# mode: orgstruct
+# orgstruct-heading-prefix-regexp: "^\s*###"
+# sh-basic-offset: 4
+# End:

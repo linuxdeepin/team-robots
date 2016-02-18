@@ -1,0 +1,43 @@
+1.4.1
+修复bbs一键提交bug的问题，bugzilla需要bugzilla的用户才能添加到cclist
+
+1.4.0
+添加bbs一键提交bug到bugzilla功能
+
+1.3.0
+基础设施服务迁移，更新部分服务url（此版本前的后台插件服务将不再支持，若不更新将无法正常使用）
+
+1.2.1
+前端增加抢单数量上限的提示
+
+1.2.0
+DTask 后端 Links API 更新，进行适应性修改
+（在此版本之前的 buzilla -> tower 的任务创建将不能正常使用）
+
+1.1.6
+修复除hacking day以外不能正常显示gerrit状态的bug
+改进左侧帮助信息的提示，显示hacking day任务数量相关信息
+
+1.1.5
+修复gerrit和hacking day异常消失的bug
+在回归测试列表中也显示任务归属者
+
+1.1.4
+添加测试结果判定功能
+后台添加数据统计
+
+1.1.3
+接入重写的新后端，将hacking day代码分离
+修复部分bug
+
+1.1.2
+修复图标无限渲染问题
+
+1.1.1
+脱离warehouse，使用dtask后端获取gerrit状态
+添加hacking day支持
+
+1.1.0
+添加一键创建功能（不稳定版）
+添加了popup menu
+

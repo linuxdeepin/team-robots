@@ -1,0 +1,61 @@
+{
+    "manifest_version": 2,
+    "name": "DTask",
+    "description": "deepin task manager",
+    "version": "1.4.1",
+    "update_url":"https://tools.deepin.io/dtask/plugin/update/update.xml",
+
+    "browser_action":{
+        "default_icon":"images/icon.png",
+        "default_popup":"pages/popup.html"
+    },
+
+    "permissions": [
+        "cookies",
+        "tabs",
+        "webRequestBlocking",
+        "webRequest",
+        "*://*.tower.im/*",
+        "*://*.deepin.io/*",
+        "*://*.deepin.org/*"
+    ],
+
+    "icons":{
+        "16":"images/deepin_logo_16px.png",
+        "48":"images/deepin_logo_48px.png",
+        "64":"images/deepin_logo_64px.png",
+        "152":"images/deepin_logo_152px.png"
+    },
+
+    "background": {
+        "page": "pages/background.html",
+        "persistent": true
+    },
+
+    "content_scripts": [{
+        "matches": ["https://tower.im/*"],
+        "js": ["scripts/jquery.min.js", "scripts/main.js", "scripts/hacking_day.js"],
+        "all_frames": true
+    },
+    {
+        "matches": ["https://tools.deepin.io/dtask/plugin/static/tower_login.html"],
+        "js": ["scripts/jquery.min.js", "scripts/tower_login.ext.js"],
+        "all_frames": true
+    },
+    {
+      "matches":["*://bugzilla.deepin.io/show_bug.cgi?id=*" ],
+      "js":["scripts/jquery.min.js", "scripts/jquery.cookie.js", "scripts/jquery.parseparams.js", "scripts/bugzilla.ext.js"],
+      "all_frames":true
+    },
+    {
+      "matches":["http://bbs.deepin.org/forum.php?mod=viewthread&tid=*"],
+      "js":["scripts/jquery.min.js", "scripts/jquery.parseparams.js", "scripts/bbs.ext.js"],
+      "css": ["css/bbs.ext.css"]
+    }],
+
+    "web_accessible_resources": [
+        "img/*.png",
+        "images/*.png",
+        "images/*.gif"
+    ]
+}
