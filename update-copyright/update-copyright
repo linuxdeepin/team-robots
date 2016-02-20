@@ -45,6 +45,13 @@ is_own_copyright() {
     fi
 }
 
+# rename to another file, and if the file exists keep the mode same
+# with it
+keep_mode_mv() {
+    cat "${1}" > "${2}"
+    rm -vf "${1}"
+}
+
 OPT_ADD=1
 OPT_UPDATE=2
 get_next_operation() {
@@ -89,7 +96,7 @@ check_copyright_c() {
 }
 do_add_copyright_c() {
     printf "${copyright_c}\n\n" | cat - "${1}" > "${1}".new
-    mv -f "${1}".new "${1}"
+    keep_mode_mv "${1}".new "${1}"
 }
 do_update_copyright_c() {
     local target="${1}"
@@ -135,7 +142,7 @@ do_add_copyright_go() {
         sed -i -e "1r /tmp/copyright" "${target}"
     else
         printf "${copyright_c}\n\n" | cat - "${1}" > "${1}".new
-        mv -f "${1}".new "${1}"
+        keep_mode_mv "${1}".new "${1}"
     fi
 }
 
@@ -157,7 +164,7 @@ do_add_copyright_script() {
         sed -i -e "1r /tmp/copyright" "${target}"
     else
         printf "${copyright_script}\n\n" | cat - "${1}" > "${1}".new
-        mv -f "${1}".new "${1}"
+        keep_mode_mv "${1}".new "${1}"
     fi
 }
 do_update_copyright_script() {
