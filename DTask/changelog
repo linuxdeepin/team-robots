@@ -1,3 +1,6 @@
+1.4.2
+修复论坛改成了https，导致bbs地址监听失败，bbs->bugzilla部分失效
+
 1.4.1
 修复bbs一键提交bug的问题，bugzilla需要bugzilla的用户才能添加到cclist
 

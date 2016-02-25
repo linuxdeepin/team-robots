@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "DTask",
     "description": "deepin task manager",
-    "version": "1.4.1",
+    "version": "1.4.2",
     "update_url":"https://tools.deepin.io/dtask/plugin/update/update.xml",
 
     "browser_action":{
@@ -33,12 +33,12 @@
     },
 
     "content_scripts": [{
-        "matches": ["https://tower.im/*"],
+        "matches": ["*://tower.im/*"],
         "js": ["scripts/jquery.min.js", "scripts/main.js", "scripts/hacking_day.js"],
         "all_frames": true
     },
     {
-        "matches": ["https://tools.deepin.io/dtask/plugin/static/tower_login.html"],
+        "matches": ["*://tools.deepin.io/dtask/plugin/static/tower_login.html"],
         "js": ["scripts/jquery.min.js", "scripts/tower_login.ext.js"],
         "all_frames": true
     },
@@ -48,7 +48,7 @@
       "all_frames":true
     },
     {
-      "matches":["http://bbs.deepin.org/forum.php?mod=viewthread&tid=*"],
+      "matches":["*://bbs.deepin.org/forum.php?mod=viewthread&tid=*"],
       "js":["scripts/jquery.min.js", "scripts/jquery.parseparams.js", "scripts/bbs.ext.js"],
       "css": ["css/bbs.ext.css"]
     }],
