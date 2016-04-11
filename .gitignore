@@ -1,3 +1,5 @@
 *.crx
 *.pem
 *.tmp
+jenkins-tags-monitor/tasklist
+jenkins-tags-monitor/repos
