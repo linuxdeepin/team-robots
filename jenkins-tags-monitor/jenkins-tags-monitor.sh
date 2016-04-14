@@ -337,9 +337,9 @@ if [ -n "${prj_name}" ]; then
       append_task "${prj_name}" "${tag_name}"
     fi
   fi
+else
+  # dispatch left failed tasks
+  if ! dispatch_tasks; then
+      abort "error occurred"
+  fi
 fi
-
-# dispatch left tasks
-# if ! dispatch_tasks; then
-#   abort "error occurred"
-# fi
