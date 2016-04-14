@@ -177,7 +177,10 @@ is_task_left() {
 
 mark_task_finished() {
   msg2 "mark task finished: $1"
-  sed -i "/^$1\$/d" "${tasklist_file}"
+  # convert "lastore/lastore-daemon 0.9.18.3" to lastore\/lastore-daemon 0.9.18.3
+  local keywords="$(echo "$1" | sed 's=/=\\/=g')"
+  msg2 "task keywords: ${keywords}"
+  sed -i "/^${keywords}\$/d" "${tasklist_file}"
 }
 
 start_task() {
@@ -328,15 +331,15 @@ done
 
 if [ -n "${prj_name}" ]; then
   if is_public_prj "${prj_name}"; then
-    append_task "${prj_name}" "${tag_name}"
     task="${prj_name} ${tag_name}"
-    if start_task "${task}"; then
-      mark_task_finished "${task}"
+    if ! start_task "${task}"; then
+      # append failed task to tasklist
+      append_task "${prj_name}" "${tag_name}"
     fi
   fi
 fi
 
 # dispatch left tasks
-if ! dispatch_tasks; then
-  abort "error occurred"
-fi
+# if ! dispatch_tasks; then
+#   abort "error occurred"
+# fi
