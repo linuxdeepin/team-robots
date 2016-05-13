@@ -25,6 +25,7 @@ fi
 prj_name="${GERRIT_PROJECT}"
 tag_name="${GERRIT_REFNAME##*/}"
 gerrit_url="https://cr.deepin.io"
+gerrit_web_url="https://cr.deepin.io/#/admin/projects"
 
 ### Config
 
@@ -246,7 +247,7 @@ start_task() {
     echo 'Content-Type: text/plain;charset="utf-8"' >> "${mail_file}"
     echo "" >> "${mail_file}"
     echo "Release ${github_prj_name} ${tag}" >> "${mail_file}"
-    echo "${gerrit_url}/${prj}" >> "${mail_file}"
+    echo "${gerrit_web_url}/${prj}" >> "${mail_file}"
     echo "" >> "${mail_file}"
     echo "${changelog}" >> "${mail_file}"
     echo "..." >> "${mail_file}"
