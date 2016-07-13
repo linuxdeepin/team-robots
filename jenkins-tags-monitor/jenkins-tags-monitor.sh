@@ -33,7 +33,7 @@ email_receivers=(
   'deepin-developers@googlegroups.com'
 
   # magic email address to reply github comments for https://github.com/linuxdeepin/developer-center/issues/41
-  'reply+0117e56b4608f9d421fbe1c1981f234ef326a8ccf6babcaa92cf000000011320cb4092a169ce0823d885@reply.github.com'
+  'reply+0117e56b44d8e2477595bf19712fffdc2b2f7d3f9c8e7d8992cf00000001139dd28492a169ce0823d885@reply.github.com'
 
   # test only for https://github.com/fasheng/test-only/issues/1
   # 'reply+0117dec57a13e822e0a0b9facb787c2dbf7389d667ca1c5192cf00000001131ef3bd92a169ce08b393c8@reply.github.com'
