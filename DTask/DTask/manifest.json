@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "DTask",
     "description": "deepin task manager",
-    "version": "1.4.2",
+    "version": "1.5.0",
     "update_url":"https://tools.deepin.io/dtask/plugin/update/update.xml",
 
     "browser_action":{
@@ -48,7 +48,7 @@
       "all_frames":true
     },
     {
-      "matches":["*://bbs.deepin.org/forum.php?mod=viewthread&tid=*"],
+      "matches":["*://bbs.deepin.org/forum.php?mod=viewthread&tid=*", "*://en.bbs.deepin.org/forum.php?mod=viewthread&tid=*"],
       "js":["scripts/jquery.min.js", "scripts/jquery.parseparams.js", "scripts/bbs.ext.js"],
       "css": ["css/bbs.ext.css"]
     }],

@@ -1,3 +1,6 @@
+1.5.0
+bbs一键提交bug到bugzilla功能，添加对英文版bbs的支持
+
 1.4.2
 修复论坛改成了https，导致bbs地址监听失败，bbs->bugzilla部分失效
 
