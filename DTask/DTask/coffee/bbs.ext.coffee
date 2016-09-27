@@ -1,37 +1,42 @@
-BUGZ_RPC_URL = "https://bugzilla.deepin.io/jsonrpc.cgi"
-SUBMIT_BTN_TEXT = "提交"
-SUBMIT_DEFAULT_TEXT = "-- 提交到bugzilla --"
-JUMP_BTN_TEXT = "跳到bugzilla"
-BUGZ_DEFAULT_PRODUCT_NAME = "用户反馈"
-
 url_params = $.parseParams(location.search.substr(1))
-
+FB_BASE = "http://feedback.deepin.org"
+SUBMIT_BTN_TEXT = "提交"
+SUBMIT_DEFAULT_TEXT = "-- 提交到feedback --"
+JUMP_BTN_TEXT = "跳到feedback"
+USERNAME = $(".username").text()
+_lz_src = $(".thread-info img").attr("src")
+LZ_UID = parseInt(/.*uid=(\d+).*/.exec(_lz_src)[1])
+POST_CONTENT = $(".main").find(".t_f").text()
+TITLE = $("#thread_subject").text().trim()
+LANG = $.cookie "deepin_language"
 
 get_bbs_post_status = ()->
-
-    # search the match bugz bbs url
-    method = "Bug.search"
-    tid = url_params["tid"]
-    url = location.origin + location.pathname + "?mod=viewthread&tid=" + tid
-    params = {"url": url}
+    # search the match feedback
     onsuccess = (data)->
-        if data.result.bugs.length
-            bugz_id = data.result.bugs[0].id
-            bugz_url = "https://bugzilla.deepin.io/show_bug.cgi?id=#{bugz_id}"
+        found = false
+        fb_id = 0
+        for item in data
+            if item.uid == LZ_UID and item.title.trim() == TITLE
+                found = true
+                fb_id = item.id
+                break
 
-            # found bbs bugz
-            render_jump_button(bugz_url)
+        if found
+            fb_url = "#{FB_BASE}/feedback/detail/#{fb_id}"
+            render_jump_button(fb_url)
         else
-            # bbs bugz not found
             render_submit_button()
 
-    call_jsonrpc(method, params, onsuccess)
+    search_url = "#{FB_BASE}/feedback/bbshint?word=#{TITLE}"
+    return $.get(search_url).then((data)->
+        onsuccess(data)
+    )
 
 
-render_jump_button = (bugz_url)->
+render_jump_button = (url)->
     btn = $(document.createElement("button"))
     btn.click(()->
-        window.open(bugz_url)
+        window.open(url)
     )
     btn.addClass("bugz_jump DTask_tag")
     btn.text(JUMP_BTN_TEXT)
@@ -53,85 +58,63 @@ render_submit_button = ()->
     )
     btn.text("提交")
     btn.addClass("bugz_submit DTask_tag")
-    btn.click(bugz_submit_click_event)
+    btn.click(submit_click_event)
 
     $(".thread-info > h1").append(btn)
 
 
 collect_data = ()->
+    # time
+    ctime = format_time_str(new Date())
 
-    # get email from another page
-    cclist = ["tangcaijun@linuxdeepin.com"] # default cc
-    profile_source = ""
-    $.ajax(
-        url: """#{location.origin}/#{$(".thread_tp .author > .xi2").attr("href")}"""
-        async: false
-        success: (data)->
-            profile_source = data
-        error: (data)->
-            console.error("DTask err: failed to get email when getting profile source")
-            console.log(data)
-    )
+    # content
+    desc_tag = "\n\n --- from: #{location.href}"
+    text = POST_CONTENT + desc_tag
 
-    re = /<li><em>Email<\/em>([a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+.[a-zA-Z0-9_-]+)<\/li>/
-    re_list = re.exec(profile_source)
-    if re_list?.length > 1
-        email = re_list[1]
-        cclist = [email]
-
-    # get bugz title
-    title = $("#thread_subject").text()
-
-    # get bbs url
-    tid = url_params["tid"]
-    desc_tag = "\n\n --- from #{location.href} --- "
-    text = $(".main").find(".t_f").text() + desc_tag
-    url = location.origin + location.pathname + "?mod=viewthread&tid=" + tid
-
-    product = BUGZ_DEFAULT_PRODUCT_NAME
+    # component
     component = $('#DTask_bugz_component_select option:selected').val()
 
-    console.log("DTask debug: bug submit: ", product, component, "cclist:", cclist)
+    # files
+    files = []
+    for img in $(".main").find(".t_f").find("img")
+        src = img.getAttribute("file")
+        path = "#{location.origin}/#{src}"
+        files.push(path)
 
-    # debug
-    #cclist = ["tangcaijun@linuxdeepin.com"]
-    #product = "TestProduct"
-    #component = "TestComponent"
-
-    params = {"product": product, "component": component, "summary": title, "description": text, "cc": cclist, "url": url}
-    return params
-
-
-submit_bugz = (bugz_info)->
-
-    # fuck the Bug.create API
-    # url must be added by updating bug
-    bbs_url = bugz_info["url"]
-    delete bugz_info["url"]
-
-    onsuccess = (data)->
-        console.log("== submit bug ==")
-        console.log(data)
-        if data.result
-            bugz_id = data.result.id
-
-            # add url
-            update_bugz_info = {"ids":[bugz_id], "url": bbs_url}
-            update_bugz(update_bugz_info)
-        else
-            console.error("DTask err: failed to create bugz")
-
-    # add bugz
-    bugz_info["version"] = "1.0"
-    return call_jsonrpc("Bug.create", bugz_info, onsuccess)
+    return {"uid": LZ_UID, "ctime": ctime, "title": TITLE, "content": text, "type": component, "files": files}
 
 
-update_bugz = (bugz_info)->
-    onsuccess = ()->
-        $(".DTask_tag").remove()
-        get_bbs_post_status()
+format_time_str = (d)->
+    _transfer = (datetime_str)->
+        string = "" + datetime_str
+        if string.length == 1
+            string = "0" + string
+        return string
+    month = _transfer(d.getMonth() + 1)
+    date = _transfer(d.getDate())
+    hours = _transfer(d.getHours())
+    minutes = _transfer(d.getMinutes())
+    return "#{d.getFullYear()}-#{month}-#{date} #{hours}:#{minutes}"
 
-    call_jsonrpc("Bug.update", bugz_info, onsuccess)
+
+submit_bugz = (params)->
+    console.log(params)
+    url = "#{FB_BASE}/postfrombbs"
+    return $.ajax(
+            type: "post"
+            url: url
+            data: JSON.stringify(params)
+            headers:
+                "Content-Type": "application/json"
+            success: (data)->
+                console.log("finish submitting to feedback")
+                console.log(data)
+                if data.ret == 1
+                    location.reload()
+                else
+                    $("#DTask_waiting").text("(DTask: 提交失败，#{data.message})")
+    )
+
 
 render_waitting_label = ()->
     $(".DTask_tag").remove()
@@ -144,37 +127,8 @@ render_waitting_label = ()->
     $(".thread-info > h1").append(waiting)
 
 
-call_jsonrpc = (method, params, func_success, func_error, async)->
-    if !func_success
-        func_success = (data) ->
-            console.log("call jsonrpc response success")
-            console.log(data)
-
-    if !func_error
-        func_error = (data) ->
-            console.log("call jsonrpc response error")
-            console.log(data)
-
-    if async == undefined
-        async = true
-
-    data_str = """{"method":"#{method}","params":#{JSON.stringify(params)},"version":"2.0"}"""
-    #console.log("call_jsonrpc:")
-    #console.log(data_str)
-
-    return $.ajax(BUGZ_RPC_URL, {
-        type: "POST",
-        async: async,
-        contentType: "application/json-rpc",
-        data: data_str,
-        success : func_success
-        error : func_error
-    })
-
-
 fill_options = (select)->
-    params = {"names": [BUGZ_DEFAULT_PRODUCT_NAME]}
-
+    # append the default option
     option = $(document.createElement("option"))
     default_name = SUBMIT_DEFAULT_TEXT
     option.text(default_name)
@@ -183,64 +137,30 @@ fill_options = (select)->
     )
     select.append(option)
 
-    onsuccess = (data)->
-        if data.result and data.result.products.length > 0
-            for item in data.result.products[0].components
-                name = item["name"]
-                option = $(document.createElement("option"))
-                option.text(name)
-                option.attr(
-                    "value": name
-                )
-                select.append(option)
-        else
-            console.error("DTask err: failed to get product component")
-            console.log(data)
+    # append the fb types
+    fb_type_url = "#{FB_BASE}/feedback/bbstype"
 
-    call_jsonrpc("Product.get", params, onsuccess)
-
-    return select
+    $.get(fb_type_url).then((data)->
+        lang = if LANG == "zh-cn" then "zh_cn" else "en"
+        for own key, value of data[lang]
+            option = $(document.createElement("option"))
+            option.text(value)
+            option.attr(
+                "value": value
+            )
+            select.append(option)
+    )
 
 
-bugz_submit_click_event = ()->
-
-    # collect web data
-    bugz_info = collect_data()
-
+submit_click_event = ()->
+    params = collect_data()  # collect web data
     render_waitting_label()
-
-    cc_list = bugz_info["cc"]
-
-    return check_user_exist(cc_list[0]).then(()->
-        return submit_bugz(bugz_info)
-    )
+    return submit_bugz(params)
 
 
-check_user_exist = (user)->
-
-    return call_jsonrpc("User.get", {"names": user}).then((data)->
-        console.log("== check user ==")
-        console.log(data)
-        if data.result?.users.length > 0
-            return data
-        else
-            return create_user(user)
-    )
-
-
-create_user = (user)->
-    onsuccess = (data)->
-        console.log("== create user ==")
-        console.log(data)
-        return data
-
-    return call_jsonrpc("User.create", {"email": user}, onsuccess)
-
-
-username = $(".username").text()
 $.get("https://tools.deepin.io/dtask/plugin/services/bbs2bugzilla/admin_users").then((data)->
     data = $.parseJSON(data)
-    if data["users"].indexOf(username) != -1
+    if data["users"].indexOf(USERNAME) != -1
         get_bbs_post_status()
 )
 

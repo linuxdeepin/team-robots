@@ -1,3 +1,6 @@
+1.5.1
+将“bbs一键提交bug到bugzilla”功能，改成提交到feedback(https://feedback.deepin.org)
+
 1.5.0
 bbs一键提交bug到bugzilla功能，添加对英文版bbs的支持
 
