@@ -1,3 +1,6 @@
+1.5.2
+对“bbs一键提交bug到bugzilla”功能的提交内容进行优化，过滤多余的换行和不必要的图片信息
+
 1.5.1
 将“bbs一键提交bug到bugzilla”功能，改成提交到feedback(https://feedback.deepin.org)
 

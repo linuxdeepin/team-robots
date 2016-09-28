@@ -1,12 +1,12 @@
 url_params = $.parseParams(location.search.substr(1))
 FB_BASE = "http://feedback.deepin.org"
+#FB_BASE = "http://feedback.corp.deepin.org"
 SUBMIT_BTN_TEXT = "提交"
 SUBMIT_DEFAULT_TEXT = "-- 提交到feedback --"
 JUMP_BTN_TEXT = "跳到feedback"
 USERNAME = $(".username").text()
 _lz_src = $(".thread-info img").attr("src")
 LZ_UID = parseInt(/.*uid=(\d+).*/.exec(_lz_src)[1])
-POST_CONTENT = $(".main").find(".t_f").text()
 TITLE = $("#thread_subject").text().trim()
 LANG = $.cookie "deepin_language"
 
@@ -63,13 +63,29 @@ render_submit_button = ()->
     $(".thread-info > h1").append(btn)
 
 
+get_post_content = ()->
+    contents = $(".main").find(".t_f").contents()
+    text_nodes = contents.filter(()->
+        return this.nodeType == Node.TEXT_NODE
+    )
+    content = ""
+    text_nodes.each(()->
+        content += this.nodeValue
+    )
+    content_list = content.split("\n").filter((value)->
+        return value.trim() != ""
+    )
+    content = content_list.join("\n")
+    return content
+
+
 collect_data = ()->
     # time
     ctime = format_time_str(new Date())
 
     # content
     desc_tag = "\n\n --- from: #{location.href}"
-    text = POST_CONTENT + desc_tag
+    text = get_post_content() + desc_tag
 
     # component
     component = $('#DTask_bugz_component_select option:selected').val()
@@ -98,7 +114,7 @@ format_time_str = (d)->
 
 
 submit_bugz = (params)->
-    console.log(params)
+    console.log(params)  # debug
     url = "#{FB_BASE}/postfrombbs"
     return $.ajax(
             type: "post"
@@ -108,7 +124,7 @@ submit_bugz = (params)->
                 "Content-Type": "application/json"
             success: (data)->
                 console.log("finish submitting to feedback")
-                console.log(data)
+                console.log(data)  # debug
                 if data.ret == 1
                     location.reload()
                 else

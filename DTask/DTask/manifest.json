@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "DTask",
     "description": "deepin task manager",
-    "version": "1.5.1",
+    "version": "1.5.2",
     "update_url":"https://tools.deepin.io/dtask/plugin/update/update.xml",
 
     "browser_action":{
