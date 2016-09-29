@@ -84,7 +84,7 @@ collect_data = ()->
     ctime = format_time_str(new Date())
 
     # content
-    desc_tag = "\n\n --- from: #{location.href}"
+    desc_tag = """\n\n --- from: <a target="_blank" href="#{location.href}">#{location.href}</a>"""
     text = get_post_content() + desc_tag
 
     # component

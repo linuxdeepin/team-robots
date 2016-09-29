@@ -100,7 +100,7 @@
   collect_data = function() {
     var component, ctime, desc_tag, files, i, img, len, path, ref, src, text;
     ctime = format_time_str(new Date());
-    desc_tag = "\n\n --- from: " + location.href;
+    desc_tag = "\n\n --- from: <a target=\"_blank\" href=\"" + location.href + "\">" + location.href + "</a>";
     text = get_post_content() + desc_tag;
     component = $('#DTask_bugz_component_select option:selected').val();
     files = [];
