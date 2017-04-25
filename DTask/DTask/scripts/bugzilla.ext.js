@@ -137,7 +137,7 @@
     });
   };
 
-  linksHandle = function(data) {
+  linksHandle = function(data, projectGuid) {
     var link, tower_todo;
     linkDiv.html("");
     if (data.result === null || data.result.length === 0) {
@@ -150,8 +150,26 @@
       link.text("创建讨论");
     } else {
       tower_todo = data.result[0];
-      bugzDefaultLinks = data.links;
-      projectGuid = bugzDefaultLinks[product];
+      var product;
+      $.ajax({
+        url: getProductUrl + "/" + bugzillaId,
+        async: false,
+        dataType: "json",
+        success: function (data){
+          product = data.result.product;
+        }
+      });
+      console.log(product);
+      $.ajax({
+        url: bugzDefaultLinksUrl,
+        async: false,
+        dataType: "json",
+        success: function (data){
+          bugzDefaultLinks = data.links;
+          projectGuid = bugzDefaultLinks[product];
+        }
+      });
+      console.log(projectGuid);
       link = $(document.createElement("a"));
       link.attr({
         "href": "https://tower.im/projects/" + projectGuid + "/todos/" + tower_todo,
@@ -239,7 +257,8 @@
       dataType: "json",
       data: {
         "bugzilla": bugzillaId,
-        "tower_todo": "-"
+        "tower_todo": "-",
+        "projectGuid": "-"
       },
       success: linksHandle
     });
