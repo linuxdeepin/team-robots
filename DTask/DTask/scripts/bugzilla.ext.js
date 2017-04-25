@@ -150,9 +150,11 @@
       link.text("创建讨论");
     } else {
       tower_todo = data.result[0];
+      bugzDefaultLinks = data.links;
+      projectGuid = bugzDefaultLinks[product];
       link = $(document.createElement("a"));
       link.attr({
-        "href": "https://tower.im/projects/0/todos/" + tower_todo,
+        "href": "https://tower.im/projects/" + projectGuid + "/todos/" + tower_todo,
         "target": "_blank"
       });
       link.text("查看tower");
