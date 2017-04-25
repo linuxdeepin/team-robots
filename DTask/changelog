@@ -1,3 +1,6 @@
+1.5.4
+修复tower修改api后任务地址的projectGuid不能为0的bug
+
 1.5.3
 对“bbs一键提交bug到feedback”提交到feedback的帖子的from xx链接，添加可点击效果
 
