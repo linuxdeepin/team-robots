@@ -15,11 +15,13 @@ if $tokenMeta
             if con
                 items = con.split(";")
                 token = items[0]
-                expires = items[1]
+                expires = 2592000
+                csrf = items[2]
                 port.postMessage(
                     type:"bugz_store_tower_token"
                     token:token
                     expires:expires
+                    csrf:csrf
                 )
                 window.clearInterval(d)
         500

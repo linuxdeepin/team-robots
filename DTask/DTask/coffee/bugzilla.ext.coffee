@@ -5,6 +5,7 @@ linksUrl = ""
 bugzDefaultLinksUrl = ""
 createTowerUrl = ""
 getProductUrl = ""
+getProjectIdUrl = ""
 
 todolistName = "从Bugzilla创建的bug"
 params = $.parseParams(location.search.substr(1))
@@ -16,6 +17,7 @@ product = ""
 params = $.parseParams(location.search.substr(1))
 bugzillaId = params["id"]
 towerToken = $.cookie 'Tower-Token'
+towerCsrf = $.cookie 'Tower-CSRF-Token'
 
 
 port.onMessage.addListener((msg) ->
@@ -56,7 +58,7 @@ addLinkingGif = () ->
 
 createTowerAction = () ->
 
-    if not towerToken
+    if not towerToken and not towerCsrf
         loginToTower()
     else
         addLinkingGif()
@@ -70,6 +72,7 @@ createTodolist = (projectGuid) ->
         dataType:"json"
         headers:
             "Tower-Token":towerToken
+            "Tower-CSRF-token":towerCsrf
         data:
             "title": todolistName
         success:(data)->
@@ -93,6 +96,7 @@ sendCreateTowerTodoRequest = (guid)->
         dataType:"json"
         headers:
             "Tower-Token":towerToken
+            "Tower-CSRF-token":towerCsrf
         data:
             "bug_id":bugzId
             "todolist_guid":guid
@@ -119,15 +123,18 @@ linksHandle = (data) ->
         })
         link.click(createTowerAction)
         link.text("创建讨论")
+        linkDiv.append(link)
     else
         tower_todo = data.result[0]
         link = $(document.createElement("a"))
-        link.attr({
-            "href":"https://tower.im/projects/0/todos/" + tower_todo,
-            "target":"_blank"
+        $.ajax({url:"#{getProjectIdUrl}/#{tower_todo}", dataType: "json", success: (data) ->
+            link.attr({
+                "href":"https://tower.im/projects/#{data.result}/todos/" + tower_todo
+                "target":"_blank"
+            })
+            link.text("查看tower")
+            linkDiv.append(link)
         })
-        link.text("查看tower")
-    linkDiv.append(link)
 
 
 getProductBack = (data)->
@@ -155,7 +162,7 @@ initBugzProductDefaultLinks = (data) ->
         # not linked, skip to choose tower project
         else
             titile = $("#short_desc_nonedit_display").html()
-            url = "#{createTowerUrl}?id=#{bugzillaId}&title=#{titile}&tt=#{$.cookie 'Tower-Token'}"
+            url = "#{createTowerUrl}?id=#{bugzillaId}&title=#{titile}&tt=#{$.cookie 'Tower-Token'}&csrf=#{$.cookie 'Tower-CSRF-Token'}"
             window.location = url
     else
         alert("获取默认项目失败：#{data.err_msg}")
@@ -167,6 +174,7 @@ getTodolistGuid = (projectGuid) ->
         dataType:"json"
         headers:
             "Tower-Token":towerToken
+            "Tower-CSRF-token":towerCsrf
         success:(data)->
             if not data.error
                 todolistGuid = ""
@@ -187,6 +195,7 @@ initUrls = ()->
     bugzDefaultLinksUrl = "#{dtaskUrl}/plugin/services/bugz_default_links"
     createTowerUrl = "#{dtaskUrl}/plugin/static/create_tower.html"
     getProductUrl = "#{dtaskUrl}/services/bugzilla/bug"
+    getProjectIdUrl = "#{dtaskUrl}/services/tower/todo"
 
 handleAjaxError = (request, msg, e)->
     alert(msg)

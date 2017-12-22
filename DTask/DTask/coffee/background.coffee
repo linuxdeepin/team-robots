@@ -78,14 +78,21 @@ method=
     "bugz_store_tower_token":(id, port, msg)->
         token = msg.token
         expires = msg.expires
+        csrf = msg.csrf
         console.log("bugz store tower token")
-        if token != ""
+        if token != "" and csrf != ""
             # store cookie
             chrome.cookies.set(
                 "name":"Tower-Token"
                 "url": towerTokenCookieDomain
                 "value":token
                 "expirationDate":new Date().getTime()/1000 + parseInt(expires)
+            )
+            chrome.cookies.set(
+                "name": "Tower-CSRF-Token"
+                "url": towerTokenCookieDomain
+                "expirationDate":new Date().getTime()/1000 + parseInt(expires)
+                "value": csrf
             )
 
             if lastBugzTabId
