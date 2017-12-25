@@ -56,7 +56,7 @@ method=
         tmpId = port.sender.tab?.id
         index = port.sender.tab?.index
 
-        if not tmpId
+        if tmpId
             lastBugzTabId = tmpId
 
         if not index

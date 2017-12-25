@@ -69,7 +69,7 @@
       var data, index, ref, ref1, tmpId;
       tmpId = (ref = port.sender.tab) != null ? ref.id : void 0;
       index = (ref1 = port.sender.tab) != null ? ref1.index : void 0;
-      if (!tmpId) {
+      if (tmpId) {
         lastBugzTabId = tmpId;
       }
       if (!index) {
