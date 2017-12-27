@@ -237,60 +237,62 @@
   // tmp
   dtaskUpdateIntvl = setInterval(dtaskUpdate, 1000);
 
-  //$(".todo-rest").click () ->
-  $(".simple-checkbox:not(.checked)").click(function() {
-    var d, self;
-    if (!$.cookie("bugzilla_token")) {
-      port.postMessage({
-        type: "open_bugz_login_tab"
-      });
-    }
-    self = this;
-    return d = setInterval(function() {
-      var bugId, bugzillaToken;
-      bugzillaToken = $.cookie("bugzilla_token");
-      if (bugzillaToken) {
-        bugId = $(self).closest("li.todo").attr("data-bugzilla-id");
-        if (!bugId) {
-          window.clearInterval(d);
-          return;
-        }
-        $.ajax({
-          type: "POST",
-          url: `${dtaskUrl}/services/bugzilla/close`,
-          dataType: "json",
-          headers: {
-            "token": bugzillaToken
-          },
-          data: {
-            bug_id: bugId
-          },
-          success: function(data) {
-            if (!data.error) {
-              return port.postMessage({
-                type: "notificate",
-                title: "关闭完成",
-                message: "对应的Bugzilla已关闭"
-              });
-            } else {
+  $(document).ready(function() {
+    //$(".todo-rest").click () ->
+    return $(".simple-checkbox:not(.checked)").click(function() {
+      var d, self;
+      if (!$.cookie("bugzilla_token")) {
+        port.postMessage({
+          type: "open_bugz_login_tab"
+        });
+      }
+      self = this;
+      return d = setInterval(function() {
+        var bugId, bugzillaToken;
+        bugzillaToken = $.cookie("bugzilla_token");
+        if (bugzillaToken) {
+          bugId = $(self).closest("li.todo").attr("data-bugzilla-id");
+          if (!bugId) {
+            window.clearInterval(d);
+            return;
+          }
+          $.ajax({
+            type: "POST",
+            url: `${dtaskUrl}/services/bugzilla/close`,
+            dataType: "json",
+            headers: {
+              "token": bugzillaToken
+            },
+            data: {
+              bug_id: bugId
+            },
+            success: function(data) {
+              if (!data.error) {
+                return port.postMessage({
+                  type: "notificate",
+                  title: "关闭完成",
+                  message: "对应的Bugzilla已关闭"
+                });
+              } else {
+                return port.postMessage({
+                  type: "notificate",
+                  title: "关闭失败",
+                  message: "对应的Bugzilla未关闭"
+                });
+              }
+            },
+            error: function() {
               return port.postMessage({
                 type: "notificate",
                 title: "关闭失败",
                 message: "对应的Bugzilla未关闭"
               });
             }
-          },
-          error: function() {
-            return port.postMessage({
-              type: "notificate",
-              title: "关闭失败",
-              message: "对应的Bugzilla未关闭"
-            });
-          }
-        });
-        return window.clearInterval(d);
-      }
-    }, 1000);
+          });
+          return window.clearInterval(d);
+        }
+      }, 1000);
+    });
   });
 
 }).call(this);

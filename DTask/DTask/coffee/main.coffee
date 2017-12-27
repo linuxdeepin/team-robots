@@ -196,45 +196,46 @@ port.postMessage(
 # tmp
 dtaskUpdateIntvl = setInterval(dtaskUpdate, 1000)
 
-#$(".todo-rest").click () ->
-$(".simple-checkbox:not(.checked)").click () ->
-  if not $.cookie "bugzilla_token"
-    port.postMessage
-      type: "open_bugz_login_tab"
+$(document).ready ()->
+  #$(".todo-rest").click () ->
+  $(".simple-checkbox:not(.checked)").click () ->
+    if not $.cookie "bugzilla_token"
+      port.postMessage
+        type: "open_bugz_login_tab"
 
-  self = this
-  d = setInterval(
-    ()->
-      bugzillaToken = $.cookie "bugzilla_token"
-      if bugzillaToken
-        bugId = $(self).closest("li.todo").attr("data-bugzilla-id")
-        if not bugId
-          window.clearInterval(d)
-          return
-        $.ajax
-          type: "POST"
-          url: "#{dtaskUrl}/services/bugzilla/close"
-          dataType:"json"
-          headers:
-            "token": bugzillaToken
-          data:
-            bug_id: bugId
-          success: (data) ->
-            if not data.error
-              port.postMessage
-                type: "notificate"
-                title: "关闭完成"
-                message: "对应的Bugzilla已关闭"
-            else
+    self = this
+    d = setInterval(
+      ()->
+        bugzillaToken = $.cookie "bugzilla_token"
+        if bugzillaToken
+          bugId = $(self).closest("li.todo").attr("data-bugzilla-id")
+          if not bugId
+            window.clearInterval(d)
+            return
+          $.ajax
+            type: "POST"
+            url: "#{dtaskUrl}/services/bugzilla/close"
+            dataType:"json"
+            headers:
+              "token": bugzillaToken
+            data:
+              bug_id: bugId
+            success: (data) ->
+              if not data.error
+                port.postMessage
+                  type: "notificate"
+                  title: "关闭完成"
+                  message: "对应的Bugzilla已关闭"
+              else
+                port.postMessage
+                  type: "notificate"
+                  title: "关闭失败"
+                  message: "对应的Bugzilla未关闭"
+            error: () ->
               port.postMessage
                 type: "notificate"
                 title: "关闭失败"
                 message: "对应的Bugzilla未关闭"
-          error: () ->
-            port.postMessage
-              type: "notificate"
-              title: "关闭失败"
-              message: "对应的Bugzilla未关闭"
-        window.clearInterval(d)
-    1000
-  )
+          window.clearInterval(d)
+      1000
+    )
