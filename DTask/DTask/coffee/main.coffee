@@ -63,7 +63,8 @@ renderTodoStatusLabel = (todoGuid, bugzId)->
             bugzLink.addClass("bugzilla-link")
             bugzLink.addClass("dtask-label")
             bugzLink.addClass("label no-assign")
-            $(e).find(".todo-assign-due").after(bugzLink)
+            $(e).find(".todo-assign-due")?.after(bugzLink)
+            $(e).find(".label.completed-member")?.after(bugzLink)
     )
 
 

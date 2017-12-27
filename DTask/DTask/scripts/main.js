@@ -63,7 +63,7 @@
   renderTodoStatusLabel = function(todoGuid, bugzId) {
     // add label
     return $(".todo").each(function(i, e) {
-      var bugzLink, bugzUrl;
+      var bugzLink, bugzUrl, ref, ref1;
       if (todoGuid === e.getAttribute("data-guid") && $(e).find(".dtask-label").length === 0) {
         $(e).attr({
           "data-bugzilla-id": bugzId
@@ -79,7 +79,10 @@
         bugzLink.addClass("bugzilla-link");
         bugzLink.addClass("dtask-label");
         bugzLink.addClass("label no-assign");
-        return $(e).find(".todo-assign-due").after(bugzLink);
+        if ((ref = $(e).find(".todo-assign-due")) != null) {
+          ref.after(bugzLink);
+        }
+        return (ref1 = $(e).find(".label.completed-member")) != null ? ref1.after(bugzLink) : void 0;
       }
     });
   };
