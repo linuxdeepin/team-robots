@@ -13,6 +13,7 @@
     "permissions": [
         "cookies",
         "tabs",
+        "notifications",
         "webRequestBlocking",
         "webRequest",
         "*://*.tower.im/*",
@@ -34,7 +35,7 @@
 
     "content_scripts": [{
         "matches": ["*://tower.im/*"],
-        "js": ["scripts/jquery.min.js", "scripts/main.js", "scripts/hacking_day.js"],
+        "js": ["scripts/jquery.min.js", "scripts/jquery.cookie.js", "scripts/main.js", "scripts/hacking_day.js"],
         "all_frames": true
     },
     {

@@ -50,6 +50,12 @@ method=
             key: key
             value: value
         )
+    "notificate": (id, port, data) ->
+      chrome.notifications.create
+        type: "basic"
+        iconUrl: chrome.extension.getURL "images/deepin_logo_48px.png"
+        title: data.title
+        message: data.message
 
     # ----------- bugzilla ---------- #
     "bugz_open_tower_login_tab":(id, port, msg)->
@@ -74,6 +80,14 @@ method=
             data:data
         )
 
+    "open_bugz_login_tab": (id, port, msg) ->
+      index = port.sender.tab?.index
+      if not index
+          index = 0
+
+      chrome.tabs.create
+        url: chrome.extension.getURL 'pages/bugzilla_login.html'
+        index: index + 1
 
     "bugz_store_tower_token":(id, port, msg)->
         token = msg.token

@@ -64,6 +64,14 @@
         value: value
       });
     },
+    "notificate": function(id, port, data) {
+      return chrome.notifications.create({
+        type: "basic",
+        iconUrl: chrome.extension.getURL("images/deepin_logo_48px.png"),
+        title: data.title,
+        message: data.message
+      });
+    },
     // ----------- bugzilla ---------- #
     "bugz_open_tower_login_tab": function(id, port, msg) {
       var data, index, ref, ref1, tmpId;
@@ -84,6 +92,17 @@
       return port.postMessage({
         type: "bugz_open_tower_login_tab_result",
         data: data
+      });
+    },
+    "open_bugz_login_tab": function(id, port, msg) {
+      var index, ref;
+      index = (ref = port.sender.tab) != null ? ref.index : void 0;
+      if (!index) {
+        index = 0;
+      }
+      return chrome.tabs.create({
+        url: chrome.extension.getURL('pages/bugzilla_login.html'),
+        index: index + 1
       });
     },
     "bugz_store_tower_token": function(id, port, msg) {

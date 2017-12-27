@@ -16,15 +16,16 @@ port.onMessage.addListener((msg)->
             dtaskUpdate()
 )
 
-checkTodoStatus = (projectGuid, todoGuid)->
+checkTodoStatus = (todoGroup)->
     $.ajax(
-        #url: "#{dtaskUrl}/links"
-        url: "#{dtaskUrl}/info/for_browser_plugin"
+        type: 'POST'
+        url: "#{dtaskUrl}/services/for_browser_plugin"
         dataType:"json"
-        data:
-            tower_todo_guid: todoGuid
+        contentType: "application/json; charset=utf-8"
+        data: JSON.stringify
+            todo_guids: todoGroup
         success: (data)->
-            checkTodoStatusResult(data, projectGuid, todoGuid)
+            checkTodoStatusResult(data)
         error: (req, msg, e)->
             console.log("check links request error: ", msg)
             error = true
@@ -45,10 +46,12 @@ getTowerDetailInfo = (todoGuid, callback)->
     )
 
 
-renderTodoStatusLabel = (data, projectGuid, todoGuid, bugzId)->
+renderTodoStatusLabel = (todoGuid, bugzId)->
     # add label
     $(".todo").each((i, e)->
         if todoGuid == e.getAttribute("data-guid") and $(e).find(".dtask-label").length == 0
+            $(e).attr
+              "data-bugzilla-id": bugzId
             bugzUrl = "https://bugzilla.deepin.io/show_bug.cgi?id=#{bugzId}"
             bugzLink = $(document.createElement("a"))
             bugzLink.attr(
@@ -64,23 +67,23 @@ renderTodoStatusLabel = (data, projectGuid, todoGuid, bugzId)->
     )
 
 
-checkTodoStatusResult = (data, projectGuid, todoGuid)->
-
-    bugzId = data.result?.bugzilla?.id
-    if bugzId
-        renderTodoStatusLabel(data, projectGuid, todoGuid, bugzId)
-
-    renderTodoStatusIcons(data, projectGuid, todoGuid)
+checkTodoStatusResult = (data)->
+  for todo in data.result
+    do (todo) ->
+      renderTodoStatusLabel(todo.towerGuid, todo.bugzillaId)
+      renderTodoStatusIcons(data, todo.towerGuid)
 
 
 dtaskUpdate = ->
+    todoGroup = []
     $(".todo").each((i, e)->
         if not $(e).find(".dtask-marker-label-for-gerrit").length
-            projectGuid = e.getAttribute("data-project-guid")
-            todoGuid = e.getAttribute("data-guid")
-            checkTodoStatus(projectGuid, todoGuid)
+            todoGuid = $(e).attr("data-guid")
+            todoGroup.push(todoGuid)
             $(e).append(getMarkerLabel())
     )
+    if todoGroup.length
+        checkTodoStatus(todoGroup)
 
     hackTaskCount()
     hackSlidebarMenu()
@@ -124,7 +127,7 @@ renderIconsContainer = (icons, parent)->
 
         parent.append(link)
 
-renderTodoStatusIcons = (data, projectGuid, todoGuid)->
+renderTodoStatusIcons = (data, todoGuid)->
     el = $(".todo[data-guid=#{todoGuid}]")
     el.find(".dtask-icons").remove()
     data?.result?.status_icons?.forEach((c)->
@@ -192,3 +195,46 @@ port.postMessage(
 
 # tmp
 dtaskUpdateIntvl = setInterval(dtaskUpdate, 1000)
+
+#$(".todo-rest").click () ->
+$(".simple-checkbox:not(.checked)").click () ->
+  if not $.cookie "bugzilla_token"
+    port.postMessage
+      type: "open_bugz_login_tab"
+
+  self = this
+  d = setInterval(
+    ()->
+      bugzillaToken = $.cookie "bugzilla_token"
+      if bugzillaToken
+        bugId = $(self).closest("li.todo").attr("data-bugzilla-id")
+        if not bugId
+          window.clearInterval(d)
+          return
+        $.ajax
+          type: "POST"
+          url: "#{dtaskUrl}/services/bugzilla/close"
+          dataType:"json"
+          headers:
+            "token": bugzillaToken
+          data:
+            bug_id: bugId
+          success: (data) ->
+            if not data.error
+              port.postMessage
+                type: "notificate"
+                title: "关闭完成"
+                message: "对应的Bugzilla已关闭"
+            else
+              port.postMessage
+                type: "notificate"
+                title: "关闭失败"
+                message: "对应的Bugzilla未关闭"
+          error: () ->
+            port.postMessage
+              type: "notificate"
+              title: "关闭失败"
+              message: "对应的Bugzilla未关闭"
+        window.clearInterval(d)
+    1000
+  )

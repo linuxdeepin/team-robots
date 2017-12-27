@@ -6,3 +6,4 @@ all:
 	coffee -c -o ../scripts hacking_day.coffee
 	coffee -c -o ../pages background.coffee
 	coffee -c -o ../pages/js popup.coffee
+	coffee -c -o ../pages/js bugzilla_login.coffee

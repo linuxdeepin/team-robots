@@ -24,16 +24,17 @@
     }
   });
 
-  checkTodoStatus = function(projectGuid, todoGuid) {
+  checkTodoStatus = function(todoGroup) {
     return $.ajax({
-      //url: "#{dtaskUrl}/links"
-      url: `${dtaskUrl}/info/for_browser_plugin`,
+      type: 'POST',
+      url: `${dtaskUrl}/services/for_browser_plugin`,
       dataType: "json",
-      data: {
-        tower_todo_guid: todoGuid
-      },
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify({
+        todo_guids: todoGroup
+      }),
       success: function(data) {
-        return checkTodoStatusResult(data, projectGuid, todoGuid);
+        return checkTodoStatusResult(data);
       },
       error: function(req, msg, e) {
         console.log("check links request error: ", msg);
@@ -59,11 +60,14 @@
     });
   };
 
-  renderTodoStatusLabel = function(data, projectGuid, todoGuid, bugzId) {
+  renderTodoStatusLabel = function(todoGuid, bugzId) {
     // add label
     return $(".todo").each(function(i, e) {
       var bugzLink, bugzUrl;
       if (todoGuid === e.getAttribute("data-guid") && $(e).find(".dtask-label").length === 0) {
+        $(e).attr({
+          "data-bugzilla-id": bugzId
+        });
         bugzUrl = `https://bugzilla.deepin.io/show_bug.cgi?id=${bugzId}`;
         bugzLink = $(document.createElement("a"));
         bugzLink.attr({
@@ -80,25 +84,34 @@
     });
   };
 
-  checkTodoStatusResult = function(data, projectGuid, todoGuid) {
-    var bugzId, ref, ref1;
-    bugzId = (ref = data.result) != null ? (ref1 = ref.bugzilla) != null ? ref1.id : void 0 : void 0;
-    if (bugzId) {
-      renderTodoStatusLabel(data, projectGuid, todoGuid, bugzId);
+  checkTodoStatusResult = function(data) {
+    var j, len, ref, results, todo;
+    ref = data.result;
+    results = [];
+    for (j = 0, len = ref.length; j < len; j++) {
+      todo = ref[j];
+      results.push((function(todo) {
+        renderTodoStatusLabel(todo.towerGuid, todo.bugzillaId);
+        return renderTodoStatusIcons(data, todo.towerGuid);
+      })(todo));
     }
-    return renderTodoStatusIcons(data, projectGuid, todoGuid);
+    return results;
   };
 
   dtaskUpdate = function() {
+    var todoGroup;
+    todoGroup = [];
     $(".todo").each(function(i, e) {
-      var projectGuid, todoGuid;
+      var todoGuid;
       if (!$(e).find(".dtask-marker-label-for-gerrit").length) {
-        projectGuid = e.getAttribute("data-project-guid");
-        todoGuid = e.getAttribute("data-guid");
-        checkTodoStatus(projectGuid, todoGuid);
+        todoGuid = $(e).attr("data-guid");
+        todoGroup.push(todoGuid);
         return $(e).append(getMarkerLabel());
       }
     });
+    if (todoGroup.length) {
+      checkTodoStatus(todoGroup);
+    }
     hackTaskCount();
     return hackSlidebarMenu();
   };
@@ -151,7 +164,7 @@
     return results;
   };
 
-  renderTodoStatusIcons = function(data, projectGuid, todoGuid) {
+  renderTodoStatusIcons = function(data, todoGuid) {
     var el, ref, ref1;
     el = $(`.todo[data-guid=${todoGuid}]`);
     el.find(".dtask-icons").remove();
@@ -223,5 +236,61 @@
 
   // tmp
   dtaskUpdateIntvl = setInterval(dtaskUpdate, 1000);
+
+  //$(".todo-rest").click () ->
+  $(".simple-checkbox:not(.checked)").click(function() {
+    var d, self;
+    if (!$.cookie("bugzilla_token")) {
+      port.postMessage({
+        type: "open_bugz_login_tab"
+      });
+    }
+    self = this;
+    return d = setInterval(function() {
+      var bugId, bugzillaToken;
+      bugzillaToken = $.cookie("bugzilla_token");
+      if (bugzillaToken) {
+        bugId = $(self).closest("li.todo").attr("data-bugzilla-id");
+        if (!bugId) {
+          window.clearInterval(d);
+          return;
+        }
+        $.ajax({
+          type: "POST",
+          url: `${dtaskUrl}/services/bugzilla/close`,
+          dataType: "json",
+          headers: {
+            "token": bugzillaToken
+          },
+          data: {
+            bug_id: bugId
+          },
+          success: function(data) {
+            if (!data.error) {
+              return port.postMessage({
+                type: "notificate",
+                title: "关闭完成",
+                message: "对应的Bugzilla已关闭"
+              });
+            } else {
+              return port.postMessage({
+                type: "notificate",
+                title: "关闭失败",
+                message: "对应的Bugzilla未关闭"
+              });
+            }
+          },
+          error: function() {
+            return port.postMessage({
+              type: "notificate",
+              title: "关闭失败",
+              message: "对应的Bugzilla未关闭"
+            });
+          }
+        });
+        return window.clearInterval(d);
+      }
+    }, 1000);
+  });
 
 }).call(this);
