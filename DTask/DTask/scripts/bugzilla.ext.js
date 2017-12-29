@@ -201,7 +201,7 @@
       } else {
         // not linked, skip to choose tower project
         titile = $("#short_desc_nonedit_display").html();
-        url = `${createTowerUrl}?id=${bugzillaId}&title=${titile}&tt=${$.cookie('Tower-Token')}&csrf=${$.cookie('Tower-CSRF-Token')}`;
+        url = `${createTowerUrl}?id=${bugzillaId}&title=${titile}&tt=${$.cookie('Tower-Token').replace(/ /g, "%2B")}&csrf=${$.cookie('Tower-CSRF-Token').replace(/ /g, "%2B")}`;
         return window.location = url;
       }
     } else {

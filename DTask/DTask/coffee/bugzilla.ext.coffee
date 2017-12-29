@@ -162,7 +162,7 @@ initBugzProductDefaultLinks = (data) ->
         # not linked, skip to choose tower project
         else
             titile = $("#short_desc_nonedit_display").html()
-            url = "#{createTowerUrl}?id=#{bugzillaId}&title=#{titile}&tt=#{$.cookie 'Tower-Token'}&csrf=#{$.cookie 'Tower-CSRF-Token'}"
+            url = "#{createTowerUrl}?id=#{bugzillaId}&title=#{titile}&tt=#{$.cookie('Tower-Token').replace(/ /g, "%2B")}&csrf=#{$.cookie('Tower-CSRF-Token').replace(/ /g, "%2B")}"
             window.location = url
     else
         alert("获取默认项目失败：#{data.err_msg}")
