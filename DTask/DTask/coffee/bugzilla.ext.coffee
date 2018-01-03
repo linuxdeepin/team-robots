@@ -71,8 +71,8 @@ createTodolist = (projectGuid) ->
         type:"POST"
         dataType:"json"
         headers:
-            "Tower-Token":towerToken
-            "Tower-CSRF-token":towerCsrf
+            "Tower-Token":towerToken.replace(/ /g, '+')
+            "Tower-CSRF-token":towerCsrf.replace(/ /g, '+')
         data:
             "title": todolistName
         success:(data)->
@@ -95,8 +95,8 @@ sendCreateTowerTodoRequest = (guid)->
         type:"PUT"
         dataType:"json"
         headers:
-            "Tower-Token":towerToken
-            "Tower-CSRF-token":towerCsrf
+            "Tower-Token":towerToken.replace(/ /g, '+')
+            "Tower-CSRF-token":towerCsrf.replace(/ /g, '+')
         data:
             "bug_id":bugzId
             "todolist_guid":guid
@@ -162,7 +162,7 @@ initBugzProductDefaultLinks = (data) ->
         # not linked, skip to choose tower project
         else
             titile = $("#short_desc_nonedit_display").html()
-            url = "#{createTowerUrl}?id=#{bugzillaId}&title=#{titile}&tt=#{$.cookie('Tower-Token').replace(/ /g, "%2B")}&csrf=#{$.cookie('Tower-CSRF-Token').replace(/ /g, "%2B")}"
+            url = "#{createTowerUrl}?id=#{bugzillaId}&title=#{titile}&tt=#{$.cookie('Tower-Token').replace(/ /g, '%2B')}&csrf=#{$.cookie('Tower-CSRF-Token').replace(/ /g, '%2B')}"
             window.location = url
     else
         alert("获取默认项目失败：#{data.err_msg}")
@@ -173,8 +173,8 @@ getTodolistGuid = (projectGuid) ->
         url: "#{dtaskUrl}/services/tower/projects/#{projectGuid}/todolists"
         dataType:"json"
         headers:
-            "Tower-Token":towerToken
-            "Tower-CSRF-token":towerCsrf
+            "Tower-Token":towerToken.replace(/ /g, '+')
+            "Tower-CSRF-token":towerCsrf.replace(/ /g, '+')
         success:(data)->
             if not data.error
                 todolistGuid = ""

@@ -2,7 +2,7 @@ body {
   font-family: Helvetica, Helvetica Neue, Neue, Sans, Arial;
   font-size: 12px;
   min-width: 180px;
-  min-height: 45px;
+  height: 60px;
   overflow: hidden;
 }
 
@@ -14,11 +14,22 @@ a {
   text-decoration: none;
 }
 
+#loginTower {
+  box-sizing: border-box;
+  padding: 5px;
+  width: 100%;
+  position: absolute;
+  left: 0;
+  transition: color 0.1s, background-color 0.1s;
+  display: inline-block;
+}
+
 #defaultLinks {
   box-sizing: border-box;
   padding: 5px;
   width: 100%;
   position: absolute;
+  top: 30px;
   left: 0;
   transition: color 0.1s, background-color 0.1s;
   display: inline-block;
@@ -37,6 +48,11 @@ a {
   text-align: center;
   display: inline-block;
   /*line-height: 14px;*/
+}
+
+#loginTower:hover{
+  background-color: #333;
+  color: #eee;
 }
 
 #defaultLinks:hover{

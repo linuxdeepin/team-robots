@@ -3,6 +3,7 @@ port = chrome.runtime.connect({name:"dataconnect"})
 dtaskUrl = ""
 loginTowerUrl = ""
 setDefaultLinksEL = $("#defaultLinks")
+loginTowerEL = $("#loginTower")
 
 settingDefaultLinksPagesUrl = ""
 
@@ -17,6 +18,10 @@ port.onMessage.addListener((msg) ->
 
 
 #setDefaultLinksEL.on("click", getTowerToken)
+loginTowerEL.on "click", ()->
+    port.postMessage(
+        type:"bugz_open_tower_login_tab"
+    )
 
 getDTaskUrl = ()->
     port.postMessage(
