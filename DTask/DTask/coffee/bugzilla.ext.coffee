@@ -100,7 +100,7 @@ sendCreateTowerTodoRequest = (guid)->
         data:
             "bug_id":bugzId
             "todolist_guid":guid
-            "bug_titile":bugzTitle
+            "bug_title":bugzTitle
         success:(data)->
             if not data.error
                 console.log("create tower successfully")

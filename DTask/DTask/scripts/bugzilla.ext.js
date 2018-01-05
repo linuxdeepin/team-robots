@@ -129,7 +129,7 @@
       data: {
         "bug_id": bugzId,
         "todolist_guid": guid,
-        "bug_titile": bugzTitle
+        "bug_title": bugzTitle
       },
       success: function(data) {
         if (!data.error) {
